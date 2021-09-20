@@ -25,8 +25,21 @@ let persons = [
   }
 ]
 
+const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+const getTimeString = () => {
+  const time = new Date()
+  return `${time.toDateString()} ${time.toTimeString()}`
+}
+
 app.get('/api/persons', (request, response) => {
     response.json(persons)
+})
+
+app.get('/info', (request, response) => {
+  const infoString = `<p>Phonebook has info for ${persons.length} people</p><p>${getTimeString()}</p>`
+  response.send(infoString)
 })
 
 const PORT = 3001
