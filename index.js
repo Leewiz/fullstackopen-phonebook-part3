@@ -59,6 +59,36 @@ app.delete('/api/persons/:id', (request, response) => {
   response.status(204).end()
 })
 
+const generateId = () => {
+  return Math.floor(Math.random() * 1000000000)
+}
+
+app.post('/api/persons', (request, response) => {
+  const newPerson = request.body
+  if(!newPerson.name || !newPerson.number) {
+    return response.status(400).json({
+      error: 'content missing or incomplete'
+    })
+  }
+
+  if(persons.find(p => p.name === newPerson.name)) {
+    return response.status(409).json({
+      error: 'person already exists in phonebook'
+    })
+  }
+
+  const person = {
+    id: generateId(),
+    name: newPerson.name,
+    number: newPerson.number
+  }
+
+  persons = persons.concat(person)
+  console.log(persons)
+  console.log(person)
+  response.json(person)
+})
+
 const PORT = 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
