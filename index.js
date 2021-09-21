@@ -44,7 +44,7 @@ const getTimeString = () => {
 }
 
 app.get('/', (request, response) => {
-  
+  console.log('here')
 })
 
 app.get('/api/persons', (request, response) => {
