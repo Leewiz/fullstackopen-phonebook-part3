@@ -43,10 +43,6 @@ const getTimeString = () => {
   return `${time.toDateString()} ${time.toTimeString()}`
 }
 
-app.get('/', (request, response) => {
-  console.log('here')
-})
-
 app.get('/api/persons', (request, response) => {
     response.json(persons)
 })
