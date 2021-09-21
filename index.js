@@ -2,8 +2,9 @@ const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
 const app = express()
-app.use(express.json())
 app.use(express.static('build'))
+app.use(express.json())
+
 
 morgan.token('post-body', req => req.method === 'POST' ? JSON.stringify(req.body) : ' ')
 morgan.format('tiny-with-post-body', ':method :url :status :res[content-length] - :response-time ms :post-body')
@@ -41,6 +42,10 @@ const getTimeString = () => {
   const time = new Date()
   return `${time.toDateString()} ${time.toTimeString()}`
 }
+
+app.get('/', (request, response) => {
+  
+})
 
 app.get('/api/persons', (request, response) => {
     response.json(persons)
