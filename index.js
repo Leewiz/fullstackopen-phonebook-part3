@@ -15,9 +15,6 @@ morgan.format('tiny-with-post-body', ':method :url :status :res[content-length] 
 app.use(cors())
 app.use(morgan('tiny-with-post-body'))
 
-const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-
 const getTimeString = () => {
   const time = new Date()
   return `${time.toDateString()} ${time.toTimeString()}`
@@ -30,8 +27,10 @@ app.get('/api/persons', (request, response) => {
 })
 
 app.get('/info', (request, response) => {
-  const infoString = `<p>Phonebook has info for ${persons.length} people</p><p>${getTimeString()}</p>`
-  response.send(infoString)
+  Person.find({}).then(persons => {
+    const infoString = `<p>Phonebook has info for ${persons.length} people</p><p>${getTimeString()}</p>`
+    response.send(infoString)
+  })
 })
 
 app.get('/api/persons/:id', (request, response) => {
