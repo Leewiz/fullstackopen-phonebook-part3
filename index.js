@@ -80,11 +80,7 @@ app.put('/api/persons/:id', (request, response, next) => {
   const opts = { new: true, runValidators: true }
   Person.findByIdAndUpdate(request.params.id, newPerson, opts)
     .then(updatedPerson => {
-      if(updatedPerson) {
-        response.json(updatedPerson)
-      } else {
-        throw new Error(`${newPerson.name} was already deleted from the database`)
-      }
+      response.json(updatedPerson)
     })
     .catch(error => next(error))
 })
@@ -96,13 +92,10 @@ app.use(unknownEndpoint)
 
 const errorHandler = (error, request, response, next) => {
   console.log(error.message)
-
   if(error.name === 'CastError') {
     return response.status(400).send({ error: 'malformatted id' })
   } else if(error.name === 'ValidationError') {
     return response.status(400).json({ error: error.message })
-  } else if( error.name === 'Error') {
-    return response.status(400).json({error: error.message })
   }
   next(error)
 }
