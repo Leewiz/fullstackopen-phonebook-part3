@@ -1,18 +1,19 @@
 require('dotenv').config()
 const express = require('express')
 const app = express()
-const Person = require('./models/person')
-
 const morgan = require('morgan')
 const cors = require('cors')
+require('dotenv').config()
+const Person = require('./models/person')
 
 app.use(express.static('build'))
+app.use(cors())
 app.use(express.json())
 
+
+// request logger
 morgan.token('post-body', req => req.method === 'POST' ? JSON.stringify(req.body) : ' ')
 morgan.format('tiny-with-post-body', ':method :url :status :res[content-length] - :response-time ms :post-body')
-
-app.use(cors())
 app.use(morgan('tiny-with-post-body'))
 
 const getTimeString = () => {
@@ -36,7 +37,7 @@ app.get('/info', (request, response) => {
 })
 
 // get person by id
-app.get('/api/persons/:id', (request, response) => {
+app.get('/api/persons/:id', (request, response, next) => {
   Person.findById(request.params.id)
     .then(person => {
       if(person) {
@@ -45,14 +46,11 @@ app.get('/api/persons/:id', (request, response) => {
         response.status(404).end()
       }
     })
-    .catch(error => {
-      console.log(error)
-      response.status(500).end()
-    })
+    .catch(error => next(error))
 })
 
 // delete person
-app.delete('/api/persons/:id', (request, response) => {
+app.delete('/api/persons/:id', (request, response, next) => {
   Person.findByIdAndRemove(request.params.id)
     .then(result => {
       response.status(204).end()
@@ -61,7 +59,7 @@ app.delete('/api/persons/:id', (request, response) => {
 })
 
 // add a new person
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
   const body = request.body
   const newPerson = new Person({
     name: body.name,
@@ -74,13 +72,16 @@ app.post('/api/persons', (request, response) => {
     })
   }
 
-  newPerson.save().then(savedPerson => {
-    response.json(savedPerson)
-  })
+  newPerson.save()
+    .then(savedPerson => {
+      console.log('saved')
+      response.json(savedPerson)
+    })
+    .catch(error => next(error))
 })
 
 // update person data
-app.put('/api/persons/:id', (request, response) => {
+app.put('/api/persons/:id', (request, response, next) => {
   const body = request.body
   const person = {
     name: body.name,
@@ -93,6 +94,21 @@ app.put('/api/persons/:id', (request, response) => {
     })
     .catch(error => next(error))
 })
+
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: 'unknown endpoint' })
+}
+app.use(unknownEndpoint)
+
+const errorHandler = (error, request, response, next) => {
+  console.log(error.message)
+
+  if(error.name === 'CastError') {
+    return response.status(400).send({error: 'malformatted id'})
+  }
+  next(error)
+}
+app.use(errorHandler)
 
 // start the backend
 const PORT = process.env.PORT
