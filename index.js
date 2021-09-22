@@ -72,13 +72,20 @@ app.post('/api/persons', (request, response, next) => {
 // update person data
 app.put('/api/persons/:id', (request, response, next) => {
   const body = request.body
-  const person = {
+  const newPerson = {
     name: body.name,
     number: body.number,
   }
 
-  Person.findByIdAndUpdate(request.params.id, person, {new: true })
-    .then(updatedPerson => response.json(updatedPerson))
+  const opts = { new: true, runValidators: true }
+  Person.findByIdAndUpdate(request.params.id, newPerson, opts)
+    .then(updatedPerson => {
+      if(updatedPerson) {
+        response.json(updatedPerson)
+      } else {
+        throw new Error(`${newPerson.name} was already deleted from the database`)
+      }
+    })
     .catch(error => next(error))
 })
 
@@ -94,6 +101,8 @@ const errorHandler = (error, request, response, next) => {
     return response.status(400).send({ error: 'malformatted id' })
   } else if(error.name === 'ValidationError') {
     return response.status(400).json({ error: error.message })
+  } else if( error.name === 'Error') {
+    return response.status(400).json({error: error.message })
   }
   next(error)
 }
