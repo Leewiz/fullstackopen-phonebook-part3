@@ -20,12 +20,14 @@ const getTimeString = () => {
   return `${time.toDateString()} ${time.toTimeString()}`
 }
 
+// get all persons
 app.get('/api/persons', (request, response) => {
   Person.find({}).then(persons => {
     response.json(persons)
   })
 })
 
+// info page
 app.get('/info', (request, response) => {
   Person.find({}).then(persons => {
     const infoString = `<p>Phonebook has info for ${persons.length} people</p><p>${getTimeString()}</p>`
@@ -33,6 +35,7 @@ app.get('/info', (request, response) => {
   })
 })
 
+// get person by id
 app.get('/api/persons/:id', (request, response) => {
   Person.findById(request.params.id)
     .then(person => {
@@ -48,21 +51,22 @@ app.get('/api/persons/:id', (request, response) => {
     })
 })
 
+// delete person
 app.delete('/api/persons/:id', (request, response) => {
   Person.findByIdAndRemove(request.params.id)
-  response.status(204).end()
+    .then(result => {
+      response.status(204).end()
+    })
+    .catch(error => next(error))
 })
 
-const generateId = () => {
-  return Math.floor(Math.random() * 1000000000)
-}
-
+// add a new person
 app.post('/api/persons', (request, response) => {
   const body = request.body
-  const newPerson = {
+  const newPerson = new Person({
     name: body.name,
     number: body.number,
-  }
+  })
 
   if(!newPerson.name || !newPerson.number) {
     return response.status(400).json({
@@ -70,13 +74,28 @@ app.post('/api/persons', (request, response) => {
     })
   }
 
-  Person.findByIdAndUpdate(request.params.id, person, { new: true })
+  newPerson.save().then(savedPerson => {
+    console.log('newPerson saved:', savedPerson)
+    response.json(savedPerson)
+  })
+})
+
+// update person data
+app.put('/api/persons/:id', (request, response) => {
+  const body = request.body
+  const person = {
+    name: body.name,
+    number: body.number,
+  }
+
+  Person.findByIdAndUpdate(request.params.id, person, {new: true })
     .then(updatedPerson => {
       response.json(updatedPerson)
     })
     .catch(error => next(error))
 })
 
+// start the backend
 const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
