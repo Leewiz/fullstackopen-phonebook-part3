@@ -75,7 +75,6 @@ app.post('/api/persons', (request, response) => {
   }
 
   newPerson.save().then(savedPerson => {
-    console.log('newPerson saved:', savedPerson)
     response.json(savedPerson)
   })
 })
