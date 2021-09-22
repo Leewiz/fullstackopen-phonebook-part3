@@ -28,7 +28,7 @@ const Person = mongoose.model('Person', personSchema)
 const addPerson = (name, number) => {
   const person = new Person({ name, number })
 
-  person.save().then(result => {
+  person.save().then(() => {
     console.log('person saved!')
     mongoose.connection.close()
   })
@@ -44,12 +44,12 @@ const showAllPersons = () => {
 }
 
 switch(process.argv.length) {
-  case SHOWALL:
-    showAllPersons()
-    break
-  case ADD:
-    addPerson(process.argv[3], process.argv[4])
-    break
-  default:
-    usageHelp()
+case SHOWALL:
+  showAllPersons()
+  break
+case ADD:
+  addPerson(process.argv[3], process.argv[4])
+  break
+default:
+  usageHelp()
 }
