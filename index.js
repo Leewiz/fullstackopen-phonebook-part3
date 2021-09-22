@@ -49,8 +49,7 @@ app.get('/api/persons/:id', (request, response) => {
 })
 
 app.delete('/api/persons/:id', (request, response) => {
-  const id = Number(request.params.id)
-  persons = persons.filter(person => person.id !== id)
+  Person.findByIdAndRemove(request.params.id)
   response.status(204).end()
 })
 
@@ -59,28 +58,23 @@ const generateId = () => {
 }
 
 app.post('/api/persons', (request, response) => {
-  const newPerson = request.body
+  const body = request.body
+  const newPerson = {
+    name: body.name,
+    number: body.number,
+  }
+
   if(!newPerson.name || !newPerson.number) {
     return response.status(400).json({
       error: 'content missing or incomplete'
     })
   }
 
-  if(persons.find(p => p.name === newPerson.name)) {
-    return response.status(409).json({
-      error: 'person already exists in phonebook'
+  Person.findByIdAndUpdate(request.params.id, person, { new: true })
+    .then(updatedPerson => {
+      response.json(updatedPerson)
     })
-  }
-
-  const person = new Person({
-    id: generateId(),
-    name: newPerson.name,
-    number: newPerson.number,
-  })
-
-  person.save().then(savedPerson => {
-    response.json(savedPerson)
-  })
+    .catch(error => next(error))
 })
 
 const PORT = process.env.PORT
